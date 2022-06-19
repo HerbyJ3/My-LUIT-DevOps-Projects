@@ -1,1 +1,1 @@
-# My-LUIT-DevOps-Projects
+# LIST OF MY DEVOPS PROJECTS
