@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This template creates Auto Scaling Group
+
+Parameters:
+  EC2KeyName:
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName  
+    Default: VirginiaKey
+  
+Resources:
+  WebServerLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: My-Launch-Template
+      LaunchTemplateData:
+        ImageId: ami-0022f774911c1d690
+        InstanceType: t2.micro
+        KeyName: !Ref EC2KeyName
+        Monitoring:
+          Enabled: true
+        SecurityGroupIds:
+          - sg-05b0b36a36a57cdf0
+        UserData: 
+          Fn::Base64:
+            !Sub |
+              #!/bin/bash -x
+              sudo yum install update -y
+              sudo yum install httpd -y
+              sudo systemctl enable httpd
+              sudo systemctl start httpd
+              echo "If you can read this then your script works" > /var/www/html/index.html
+              sudo yum install update -y
+              sudo amazon-linux-extras install epel -y
+              sudo yum install stress -y
+
+  WebServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: Week8-Auto-Scaling-Group 
+      AvailabilityZones: !GetAZs '' 
+      HealthCheckGracePeriod: 60
+      HealthCheckType: EC2
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WebServerLaunchTemplate
+        Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
+      MinSize: 2
+      MaxSize: 5
+      DesiredCapacity: 2
+      Tags:
+        - Key: Name
+          Value: ASGwk8-WebServer
+          PropagateAtLaunch: true       
