@@ -1,0 +1,197 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This template creates Auto Scaling Group
+
+Parameters:
+  EC2KeyName:
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName  
+    Default: VirginiaKey
+  
+  VPCID:
+    Description: ID of the default VPC
+    Type: String
+    Default: vpc-69a78913
+  
+Resources:
+    #This creates a Security Group for Instances directed from Load Balancer
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP/port 80 via load balancer and SSH/port 22 via internet.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: My-WebServer-Security-Group-1
+      VpcId: !Ref VPCID
+
+    #This creates a security group for Load Balancer
+  ALBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP access on port 80
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0        
+      Tags:
+        - Key: Name
+          Value: My-ALB-Security-Group1
+      VpcId: !Ref VPCID
+
+  WebServerLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: My-Launch-Template
+      LaunchTemplateData:
+        ImageId: ami-0022f774911c1d690
+        InstanceType: t2.micro
+        KeyName: !Ref EC2KeyName
+        Monitoring:
+          Enabled: true
+        SecurityGroupIds:
+          - !Ref WebServerSecurityGroup
+        UserData: 
+          Fn::Base64:
+            !Sub |
+              #!/bin/bash -x
+              sudo yum install update -y
+              sudo yum install httpd -y
+              sudo systemctl enable httpd
+              sudo systemctl start httpd
+              echo "If you can read this then your script works" > /var/www/html/index.html
+              sudo yum install update -y
+              sudo amazon-linux-extras install epel -y
+              sudo yum install stress -y
+
+  WebServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: Week8-Auto-Scaling-Group 
+      AvailabilityZones: !GetAZs '' 
+      HealthCheckGracePeriod: 60
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WebServerLaunchTemplate
+        Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
+      MinSize: 2
+      MaxSize: 5
+      DesiredCapacity: 2
+      Tags:
+        - Key: Name
+          Value: ASGwk8-WebServer
+          PropagateAtLaunch: true
+      TargetGroupARNs:
+        - !Ref ALBTargetGroup   
+
+  WebServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WebServerAutoScalingGroup
+      Cooldown: 20
+      ScalingAdjustment: 1
+
+  WebServerScaleDownPolicy:
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WebServerAutoScalingGroup
+      Cooldown: 20
+      ScalingAdjustment: -1
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 50% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2      
+      Period: 10
+      Statistic: Average
+      EvaluationPeriods: 2
+      Threshold: 50
+      AlarmActions:
+        - !Ref WebServerScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerAutoScalingGroup
+      ComparisonOperator: GreaterThanThreshold
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 50% for 2 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 10
+      EvaluationPeriods: 2
+      Threshold: 50
+      AlarmActions:
+        - !Ref WebServerScaleDownPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref WebServerAutoScalingGroup
+      ComparisonOperator: LessThanThreshold   
+
+    #Create an Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: MyApplicationLoadBalancer
+      SecurityGroups: 
+        - !Ref ALBSecurityGroup
+      Subnets:
+        - subnet-bfa6be91
+        - subnet-7917ba34
+
+  #Create a Listener on Port 80
+  ALBListenerHttp:
+    Type : AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # Create a Target Group
+  ALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Name: MyTargetGroup
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 5
+      VpcId: !Ref VPCID
+
+Outputs:
+  # Export Application Load Balancer Dns Name
+  ApplicationLoadBalancerDnsName:
+    Description: Application Load Balancer DNS Name
+    Export:
+      Name: !Sub ${AWS::StackName}-ApplicationLoadBalancerDnsName
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+
+  # Export Application Load Balancer Zone ID
+  ApplicationLoadBalancerZoneID:
+    Description: Application Load Balancer Canonical Hosted Zone ID 
+    Export:
+      Name: !Sub ${AWS::StackName}-ApplicationLoadBalancerZoneID
+    Value: !GetAtt ApplicationLoadBalancer.CanonicalHostedZoneID
