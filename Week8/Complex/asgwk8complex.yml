@@ -153,6 +153,9 @@ Resources:
       Subnets:
         - subnet-bfa6be91
         - subnet-7917ba34
+        - subnet-318d936d
+        - subnet-2c2f324b
+        - subnet-e59cbddb
 
   #Create a Listener on Port 80
   ALBListenerHttp:
