@@ -112,10 +112,10 @@ Resources:
   CPUAlarmHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: Scale-up if CPU > 50% for 2 minutes
+      AlarmDescription: Scale-up if CPU > 50% for 1 minute
       MetricName: CPUUtilization
       Namespace: AWS/EC2      
-      Period: 10
+      Period: 60
       Statistic: Average
       EvaluationPeriods: 2
       Threshold: 50
@@ -129,13 +129,13 @@ Resources:
   CPUAlarmLow:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: Scale-down if CPU < 50% for 2 minutes
+      AlarmDescription: Scale-down if CPU < 40% for 5 minutes
       MetricName: CPUUtilization
       Namespace: AWS/EC2
       Statistic: Average
-      Period: 10
+      Period: 300
       EvaluationPeriods: 2
-      Threshold: 50
+      Threshold: 40
       AlarmActions:
         - !Ref WebServerScaleDownPolicy
       Dimensions:
