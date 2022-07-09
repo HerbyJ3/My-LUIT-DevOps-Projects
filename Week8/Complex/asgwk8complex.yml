@@ -191,10 +191,3 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-ApplicationLoadBalancerDnsName
     Value: !GetAtt ApplicationLoadBalancer.DNSName
-
-  # Export Application Load Balancer Zone ID
-  ApplicationLoadBalancerZoneID:
-    Description: Application Load Balancer Canonical Hosted Zone ID 
-    Export:
-      Name: !Sub ${AWS::StackName}-ApplicationLoadBalancerZoneID
-    Value: !GetAtt ApplicationLoadBalancer.CanonicalHostedZoneID
