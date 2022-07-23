@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This template creates a DynamoDB Table and an EC2 instance with an IAM Role to read DB
+
+Resources:
+  IAMroleDB:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName: WebserverDB    
+      Roles: 
+        - DynamoDB-Read-Only
+  
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SecurityGroupIds: 
+        - sg-05b0b36a36a57cdf0
+      KeyName: VirginiaKey
+      ImageId: ami-0022f774911c1d690
+      IamInstanceProfile: !Ref IAMroleDB
+  
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VideoGames
+      AttributeDefinitions:
+        - AttributeName: Game-Title
+          AttributeType: S
+        - AttributeName: Game-Release-Year
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: Game-Title
+          KeyType: HASH
+        - AttributeName: Game-Release-Year
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+        
+  
+  
+  
+  
+  
+  
