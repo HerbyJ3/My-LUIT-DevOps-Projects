@@ -1,4 +1,4 @@
-🎓Week 8 Project Instructions
+🎓Week 10 Project Instructions
 
 **Web Tier**
 1. 2 public subnets
