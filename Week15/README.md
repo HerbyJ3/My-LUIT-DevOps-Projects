@@ -4,7 +4,7 @@
 4) Create an API gateway HTTP API type trigger.
 5) Test the trigger to verify the message was sent.
 
-ADVANCED:
+ADVANCED :
 1) Create a SNS topic using Python.
 2) Use an email to subscribe to the SNS topic.
 3) Create a Lambda function with a Python 3.7 or higher runtime 
