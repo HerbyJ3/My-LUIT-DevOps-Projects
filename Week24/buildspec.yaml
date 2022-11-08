@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - sudo yum install -y yum-utils
+      - sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+      - sudo yum -y install terraform
+        
+  build:
+    commands:
+      - export AWS_ACCESS_KEY_ID=$ACCESS
+      - export AWS_SECRET_ACCESS_KEY=$SECRET
+      - terraform init
+      - terraform destroy --auto-approve
+        
+  post_build:
+    commands:
+      - echo terraform $TF_COMMAND completed on '$date'
