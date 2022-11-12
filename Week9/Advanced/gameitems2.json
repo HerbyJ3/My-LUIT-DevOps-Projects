@@ -1,0 +1,74 @@
+{
+    "Favorite_Games24": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Monster Hunter"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Call of Duty"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Sifu"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Halo"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Starcraft 2"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Battlefield"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Castle Crashers"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Caesar 3"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "Desperados"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "Game_Title": {"S": "GearsTactics"}
+                }
+            }
+        }
+    ]
+}
