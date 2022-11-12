@@ -1,19 +1,19 @@
-#1 Create Instance
-aws ec2 run-instances --image-id ami-0022f774911c1d690 --count 1 --instance-type t2.micro --key-name VirginiaKey --security-group-id ssg-eae930c2 
+#1Create instance profile to attach role
+aws iam create-instance-profile --instance-profile-name Dynamoread
 
-#Check Instance
-aws ec2 describe-instances
+#2Attach role to instance profile
+aws iam add-role-to-instance-profile --role-name DynamoDB-Read-Only --instance-profile-name Dynamoread
 
-#2 Create instance profile to attach role
-aws iam create-instance-profile ----instance-profile-name Webdynamo
-
-#3 Attach role to instance profile
-aws iam add-role-to-instance-profile --role-name DynamoDB-Read-Only --instance-profile-name Webdynamo
-
-#4 Check status of instance profile to confirm attachment
+#3 Check status of instance profile to confirm attachment
 aws iam get-instance-profile  --instance-profile-name Webdynamo
 
-#5 Add instance profile to a running EC2
+#4 Create Instance
+aws ec2 run-instances --image-id ami-0022f774911c1d690 --count 1 --instance-type t2.micro --key-name VirginiaKey --security-group-id sg-eae930c2 
+
+#5Check Instance
+aws ec2 describe-instances
+
+#6 Add instance profile to a running EC2
 aws ec2 associate-iam-instance-profile --instance-id i-0a1d912e87d84b464 --iam-instance-profile Name=Webdynamo
 
 #6 Confirms instance profile associations with EC2
@@ -37,4 +37,6 @@ aws dynamodb put-item --table-name Favorite_Games --item '{\"Game_Title\": {\"S\
 #11 Delete Resources
 aws dynamodb delete-table --table-name Favorite_Games
 aws ec2 terminate-instances --instance-ids i-00e87c1d4bffe4d68
+
+aws iam remove-role-from-instance-profile --role-name DynamoDB-Read-Only --instance-profile-name Dynamoread
 
