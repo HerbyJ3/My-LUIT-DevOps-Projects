@@ -8,7 +8,12 @@ aws iam add-role-to-instance-profile --role-name DynamoDB-Read-Only --instance-p
 aws iam get-instance-profile  --instance-profile-name Webdynamo
 
 #4 Create Instance
-aws ec2 run-instances --image-id ami-0022f774911c1d690 --count 1 --instance-type t2.micro --key-name VirginiaKey --security-group-id sg-eae930c2 
+aws ec2 run-instances --image-id ami-0022f774911c1d690 \
+--count 1 \
+--instance-type t2.micro \
+--key-name VirginiaKey \
+--security-group-id sg-eae930c2
+--tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Dynamotest}]'
 
 #5Check Instance
 aws ec2 describe-instances
