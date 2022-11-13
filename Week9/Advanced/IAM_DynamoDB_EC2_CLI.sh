@@ -12,7 +12,7 @@ aws ec2 run-instances --image-id ami-0022f774911c1d690 \
 --count 1 \
 --instance-type t2.micro \
 --key-name VirginiaKey \
---security-group-id sg-eae930c2
+--security-group-id sg-eae930c2 \
 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Dynamotest}]'
 
 #5Check Instance
