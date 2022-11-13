@@ -28,7 +28,7 @@ aws ec2 describe-iam-instance-profile-associations
 aws dynamodb create-table --table-name Favorite_Games --attribute-definitions AttributeName=Game_Title,AttributeType=S --key-schema AttributeName=Game_Title,KeyType=HASH --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
 
 #8 Create 10 items
-aws dynamodb batch-write-item --request-items file://gameitems2.json --return-consumed-capacity INDEXES --return-item-collection-metrics SIZE
+aws dynamodb batch-write-item --request-items file://gameitems.json --return-consumed-capacity INDEXES --return-item-collection-metrics SIZE
 
 #9 SSH into your EC2 and scan the for a DB table
 aws dynamodb scan --table-name Favorite_Games --region us-east-1
