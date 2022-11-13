@@ -19,7 +19,7 @@ aws ec2 run-instances --image-id ami-0022f774911c1d690 \
 aws ec2 describe-instances
 
 #6 Add instance profile to a running EC2
-aws ec2 associate-iam-instance-profile --instance-id i-0a1d912e87d84b464 --iam-instance-profile Name=Webdynamo
+aws ec2 associate-iam-instance-profile --instance-id i-012cf0787d603879d --iam-instance-profile Name=Dynamoread
 
 #6 Confirms instance profile associations with EC2
 aws ec2 describe-iam-instance-profile-associations
